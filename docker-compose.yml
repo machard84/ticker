@@ -1,0 +1,58 @@
+version: "3.9"
+
+networks:
+  tickers:
+volumes:
+  influxdb:
+x-defaults: &defaults
+  environment:
+    - BUILDKIT=1
+
+services:
+  influxdb:
+    image: localhost/influxdb:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: influxdb
+      args:
+        - RELEASE=2-2.0.9
+    ports:
+      - "8086:8086"
+    networks:
+      tickers:
+        aliases:
+          - influxdb
+    volumes:
+      - influxdb:/var/lib/influxdb2/engine/data
+
+  activemq:
+    image: localhost/activemq:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: activemq
+      args:
+        - RELEASE=5.17.3
+    ports:
+      - "8161:8161"
+    networks:
+      tickers:
+        aliases:
+          - activemq
+
+  ticker:
+    image: localhost/ticker:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ticker
+    networks:
+      tickers:
+        aliases:
+          - ticker
+    environment:
+      - AUTH_TOKEN=d7SJm_b3Q3HgR2TLPmAMHnMF16b2dPu8m13kWnwp2pHbHcU0B65NtIqZeKI7OJ_-GooEO3sbQ0w3y-xIcHEvAQ==
+      - BUCKET=start
+      - ORG_NAME=st0n3r
+      - PERIOD=15

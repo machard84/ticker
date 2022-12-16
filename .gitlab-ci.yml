@@ -1,0 +1,14 @@
+stages:
+  - build
+
+image:
+  name: docker:table
+services:
+  name: docker:stable-dind
+
+build:
+  stage: build
+  script:
+    - apk add docker-compose
+    - docker-compose build
+    - docker-compose push
